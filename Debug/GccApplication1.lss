@@ -3,29 +3,29 @@ GccApplication1.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         000003a6  00000000  00000000  00000074  2**1
+  0 .text         00000402  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000008  00800060  000003a6  0000041a  2**0
+  1 .data         00000008  00800060  00000402  00000476  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  00000422  2**0
+  2 .comment      00000030  00000000  00000000  0000047e  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000454  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000004b0  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 000000b8  00000000  00000000  00000490  2**0
+  4 .debug_aranges 000000d0  00000000  00000000  000004ec  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000ddf  00000000  00000000  00000548  2**0
+  5 .debug_info   00000efd  00000000  00000000  000005bc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000008e2  00000000  00000000  00001327  2**0
+  6 .debug_abbrev 00000951  00000000  00000000  000014b9  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   0000077f  00000000  00000000  00001c09  2**0
+  7 .debug_line   0000081b  00000000  00000000  00001e0a  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  000001e4  00000000  00000000  00002388  2**2
+  8 .debug_frame  00000224  00000000  00000000  00002628  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000443  00000000  00000000  0000256c  2**0
+  9 .debug_str    000004a7  00000000  00000000  0000284c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    000006a6  00000000  00000000  000029af  2**0
+ 10 .debug_loc    0000073e  00000000  00000000  00002cf3  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 000000b0  00000000  00000000  00003055  2**0
+ 11 .debug_ranges 000000c8  00000000  00000000  00003431  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -65,16 +65,16 @@ Disassembly of section .text:
   60:	10 e0       	ldi	r17, 0x00	; 0
   62:	a0 e6       	ldi	r26, 0x60	; 96
   64:	b0 e0       	ldi	r27, 0x00	; 0
-  66:	e6 ea       	ldi	r30, 0xA6	; 166
-  68:	f3 e0       	ldi	r31, 0x03	; 3
+  66:	e2 e0       	ldi	r30, 0x02	; 2
+  68:	f4 e0       	ldi	r31, 0x04	; 4
   6a:	02 c0       	rjmp	.+4      	; 0x70 <__do_copy_data+0x10>
   6c:	05 90       	lpm	r0, Z+
   6e:	0d 92       	st	X+, r0
   70:	a8 36       	cpi	r26, 0x68	; 104
   72:	b1 07       	cpc	r27, r17
   74:	d9 f7       	brne	.-10     	; 0x6c <__do_copy_data+0xc>
-  76:	0e 94 7c 01 	call	0x2f8	; 0x2f8 <main>
-  7a:	0c 94 d1 01 	jmp	0x3a2	; 0x3a2 <_exit>
+  76:	0e 94 a8 01 	call	0x350	; 0x350 <main>
+  7a:	0c 94 ff 01 	jmp	0x3fe	; 0x3fe <_exit>
 
 0000007e <__bad_interrupt>:
   7e:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -424,7 +424,7 @@ void writeLCD(uint16_t adc) {
  25c:	6f 5f       	subi	r22, 0xFF	; 255
  25e:	7f 4f       	sbci	r23, 0xFF	; 255
  260:	c8 01       	movw	r24, r16
- 262:	0e 94 9c 01 	call	0x338	; 0x338 <__itoa_ncheck>
+ 262:	0e 94 ca 01 	call	0x394	; 0x394 <__itoa_ncheck>
 
 	char adcStr[16];
 	itoa(adc, adcStr, 10);
@@ -432,6 +432,7 @@ void writeLCD(uint16_t adc) {
  266:	ce 01       	movw	r24, r28
  268:	01 96       	adiw	r24, 0x01	; 1
  26a:	0e 94 d3 00 	call	0x1a6	; 0x1a6 <lcd_puts>
+	
 	if(adc > 300) {
  26e:	0d 32       	cpi	r16, 0x2D	; 45
  270:	11 40       	sbci	r17, 0x01	; 1
@@ -512,124 +513,199 @@ ISR(ADC_vect) {
  2f4:	1f 90       	pop	r1
  2f6:	18 95       	reti
 
-000002f8 <main>:
+000002f8 <init_ADC_LCD>:
 
-int main(void)
-{
-	DDRD = _BV(4);
+void init_ADC_LCD() {
+		DDRD = _BV(4);
  2f8:	80 e1       	ldi	r24, 0x10	; 16
  2fa:	81 bb       	out	0x11, r24	; 17
 
-	TCCR1A = _BV(COM1B1) | _BV(WGM11) | _BV(WGM10);
+		TCCR1A = _BV(COM1B1) | _BV(WGM11) | _BV(WGM10);
  2fc:	83 e2       	ldi	r24, 0x23	; 35
  2fe:	8f bd       	out	0x2f, r24	; 47
-	TCCR1B = _BV(WGM13) | _BV(WGM12) | _BV(CS11);
+		TCCR1B = _BV(WGM13) | _BV(WGM12) | _BV(CS11);
  300:	8a e1       	ldi	r24, 0x1A	; 26
  302:	8e bd       	out	0x2e, r24	; 46
-	OCR1A = 92;
+		OCR1A = 92;
  304:	8c e5       	ldi	r24, 0x5C	; 92
  306:	90 e0       	ldi	r25, 0x00	; 0
  308:	9b bd       	out	0x2b, r25	; 43
  30a:	8a bd       	out	0x2a, r24	; 42
-	OCR1B = 31;
+		OCR1B = 31;
  30c:	8f e1       	ldi	r24, 0x1F	; 31
  30e:	90 e0       	ldi	r25, 0x00	; 0
  310:	99 bd       	out	0x29, r25	; 41
  312:	88 bd       	out	0x28, r24	; 40
 
-	lcd_init(LCD_DISP_ON);
+		lcd_init(LCD_DISP_ON);
  314:	8c e0       	ldi	r24, 0x0C	; 12
  316:	0e 94 e3 00 	call	0x1c6	; 0x1c6 <lcd_init>
 
-	TCCR0 = _BV(WGM01) | _BV(CS02) | _BV(CS00);
+		TCCR0 = _BV(WGM01) | _BV(CS02) | _BV(CS00);
  31a:	8d e0       	ldi	r24, 0x0D	; 13
  31c:	83 bf       	out	0x33, r24	; 51
-	OCR0 = 180;
+		OCR0 = 180;
  31e:	84 eb       	ldi	r24, 0xB4	; 180
  320:	8c bf       	out	0x3c, r24	; 60
 
-	TIMSK |= _BV(OCIE0);
+		TIMSK |= _BV(OCIE0);
  322:	89 b7       	in	r24, 0x39	; 57
  324:	82 60       	ori	r24, 0x02	; 2
  326:	89 bf       	out	0x39, r24	; 57
 
-	ADMUX = _BV(REFS1) | _BV(REFS0);
+		ADMUX = _BV(REFS1) | _BV(REFS0);
  328:	80 ec       	ldi	r24, 0xC0	; 192
  32a:	87 b9       	out	0x07, r24	; 7
-	ADCSRA = _BV(ADEN) | _BV(ADATE) | _BV(ADIE) | _BV(ADPS2) | _BV(ADPS1) ;
+		ADCSRA = _BV(ADEN) | _BV(ADATE) | _BV(ADIE) | _BV(ADPS2) | _BV(ADPS1) ;
  32c:	8e ea       	ldi	r24, 0xAE	; 174
  32e:	86 b9       	out	0x06, r24	; 6
-	SFIOR = _BV(ADTS1) | _BV(ADTS0);
+		SFIOR = _BV(ADTS1) | _BV(ADTS0);
  330:	80 e6       	ldi	r24, 0x60	; 96
  332:	80 bf       	out	0x30, r24	; 48
 
-	sei();
+		sei();
  334:	78 94       	sei
+ 336:	08 95       	ret
 
-	while (1);
- 336:	ff cf       	rjmp	.-2      	; 0x336 <main+0x3e>
+00000338 <USART_Init>:
+}
 
-00000338 <__itoa_ncheck>:
- 338:	bb 27       	eor	r27, r27
- 33a:	4a 30       	cpi	r20, 0x0A	; 10
- 33c:	31 f4       	brne	.+12     	; 0x34a <__itoa_ncheck+0x12>
- 33e:	99 23       	and	r25, r25
- 340:	22 f4       	brpl	.+8      	; 0x34a <__itoa_ncheck+0x12>
- 342:	bd e2       	ldi	r27, 0x2D	; 45
- 344:	90 95       	com	r25
- 346:	81 95       	neg	r24
- 348:	9f 4f       	sbci	r25, 0xFF	; 255
- 34a:	0c 94 a8 01 	jmp	0x350	; 0x350 <__utoa_common>
+void USART_Init( unsigned int ubrr) {
+	/* Set baud rate */
+	//UBRRH = (unsigned char)(ubrr>>8);
+	UBRRH = 0;
+ 338:	10 bc       	out	0x20, r1	; 32
+	UBRRL = (unsigned char)ubrr;
+ 33a:	89 b9       	out	0x09, r24	; 9
+	/* Enable receiver and transmitter */
+	UCSRB = (1<<RXEN) | (1<<TXEN) | (1<<RXCIE) | (1<<TXCIE);
+ 33c:	88 ed       	ldi	r24, 0xD8	; 216
+ 33e:	8a b9       	out	0x0a, r24	; 10
+	/* Set frame format: 8data, 1stop bit */
+	UCSRC = (1<<URSEL)|(1<<UCSZ1)|(1<<UCSZ0);
+ 340:	86 e8       	ldi	r24, 0x86	; 134
+ 342:	80 bd       	out	0x20, r24	; 32
+ 344:	08 95       	ret
 
-0000034e <__utoa_ncheck>:
- 34e:	bb 27       	eor	r27, r27
+00000346 <USARTReadChar>:
+}
 
-00000350 <__utoa_common>:
- 350:	fb 01       	movw	r30, r22
- 352:	55 27       	eor	r21, r21
- 354:	aa 27       	eor	r26, r26
- 356:	88 0f       	add	r24, r24
- 358:	99 1f       	adc	r25, r25
- 35a:	aa 1f       	adc	r26, r26
- 35c:	a4 17       	cp	r26, r20
- 35e:	10 f0       	brcs	.+4      	; 0x364 <__utoa_common+0x14>
- 360:	a4 1b       	sub	r26, r20
- 362:	83 95       	inc	r24
- 364:	50 51       	subi	r21, 0x10	; 16
- 366:	b9 f7       	brne	.-18     	; 0x356 <__utoa_common+0x6>
- 368:	a0 5d       	subi	r26, 0xD0	; 208
- 36a:	aa 33       	cpi	r26, 0x3A	; 58
- 36c:	08 f0       	brcs	.+2      	; 0x370 <__utoa_common+0x20>
- 36e:	a9 5d       	subi	r26, 0xD9	; 217
- 370:	a1 93       	st	Z+, r26
- 372:	00 97       	sbiw	r24, 0x00	; 0
- 374:	79 f7       	brne	.-34     	; 0x354 <__utoa_common+0x4>
- 376:	b1 11       	cpse	r27, r1
- 378:	b1 93       	st	Z+, r27
- 37a:	11 92       	st	Z+, r1
- 37c:	cb 01       	movw	r24, r22
- 37e:	0c 94 c1 01 	jmp	0x382	; 0x382 <strrev>
+char USARTReadChar() {
+	
+	while(!UCSRA && (1<<RXC));
+ 346:	8b b1       	in	r24, 0x0b	; 11
+ 348:	88 23       	and	r24, r24
+ 34a:	e9 f3       	breq	.-6      	; 0x346 <USARTReadChar>
+	
+	return UDR;	
+ 34c:	8c b1       	in	r24, 0x0c	; 12
+}
+ 34e:	08 95       	ret
 
-00000382 <strrev>:
- 382:	dc 01       	movw	r26, r24
- 384:	fc 01       	movw	r30, r24
- 386:	67 2f       	mov	r22, r23
- 388:	71 91       	ld	r23, Z+
- 38a:	77 23       	and	r23, r23
- 38c:	e1 f7       	brne	.-8      	; 0x386 <strrev+0x4>
- 38e:	32 97       	sbiw	r30, 0x02	; 2
- 390:	04 c0       	rjmp	.+8      	; 0x39a <strrev+0x18>
- 392:	7c 91       	ld	r23, X
- 394:	6d 93       	st	X+, r22
- 396:	70 83       	st	Z, r23
- 398:	62 91       	ld	r22, -Z
- 39a:	ae 17       	cp	r26, r30
- 39c:	bf 07       	cpc	r27, r31
- 39e:	c8 f3       	brcs	.-14     	; 0x392 <strrev+0x10>
- 3a0:	08 95       	ret
+00000350 <main>:
 
-000003a2 <_exit>:
- 3a2:	f8 94       	cli
+int main(void)
+{	
+ 350:	cf 93       	push	r28
+ 352:	df 93       	push	r29
+ 354:	cd b7       	in	r28, 0x3d	; 61
+ 356:	de b7       	in	r29, 0x3e	; 62
+ 358:	60 97       	sbiw	r28, 0x10	; 16
+ 35a:	0f b6       	in	r0, 0x3f	; 63
+ 35c:	f8 94       	cli
+ 35e:	de bf       	out	0x3e, r29	; 62
+ 360:	0f be       	out	0x3f, r0	; 63
+ 362:	cd bf       	out	0x3d, r28	; 61
+	char data,buffer[16];
+	USART_Init ( MYUBRR );
+ 364:	8f e2       	ldi	r24, 0x2F	; 47
+ 366:	90 e0       	ldi	r25, 0x00	; 0
+ 368:	0e 94 9c 01 	call	0x338	; 0x338 <USART_Init>
+	init_ADC_LCD();
+ 36c:	0e 94 7c 01 	call	0x2f8	; 0x2f8 <init_ADC_LCD>
+	
+	while (1){
+		data = USARTReadChar();
+ 370:	0e 94 a3 01 	call	0x346	; 0x346 <USARTReadChar>
+ 374:	4a e0       	ldi	r20, 0x0A	; 10
+ 376:	be 01       	movw	r22, r28
+ 378:	6f 5f       	subi	r22, 0xFF	; 255
+ 37a:	7f 4f       	sbci	r23, 0xFF	; 255
+ 37c:	90 e0       	ldi	r25, 0x00	; 0
+ 37e:	0e 94 ca 01 	call	0x394	; 0x394 <__itoa_ncheck>
+		itoa(data,buffer,10);
+		lcd_gotoxy(8,1);
+ 382:	61 e0       	ldi	r22, 0x01	; 1
+ 384:	88 e0       	ldi	r24, 0x08	; 8
+ 386:	0e 94 b0 00 	call	0x160	; 0x160 <lcd_gotoxy>
+		lcd_puts(buffer);	
+ 38a:	ce 01       	movw	r24, r28
+ 38c:	01 96       	adiw	r24, 0x01	; 1
+ 38e:	0e 94 d3 00 	call	0x1a6	; 0x1a6 <lcd_puts>
+	}
+ 392:	ee cf       	rjmp	.-36     	; 0x370 <main+0x20>
 
-000003a4 <__stop_program>:
- 3a4:	ff cf       	rjmp	.-2      	; 0x3a4 <__stop_program>
+00000394 <__itoa_ncheck>:
+ 394:	bb 27       	eor	r27, r27
+ 396:	4a 30       	cpi	r20, 0x0A	; 10
+ 398:	31 f4       	brne	.+12     	; 0x3a6 <__itoa_ncheck+0x12>
+ 39a:	99 23       	and	r25, r25
+ 39c:	22 f4       	brpl	.+8      	; 0x3a6 <__itoa_ncheck+0x12>
+ 39e:	bd e2       	ldi	r27, 0x2D	; 45
+ 3a0:	90 95       	com	r25
+ 3a2:	81 95       	neg	r24
+ 3a4:	9f 4f       	sbci	r25, 0xFF	; 255
+ 3a6:	0c 94 d6 01 	jmp	0x3ac	; 0x3ac <__utoa_common>
+
+000003aa <__utoa_ncheck>:
+ 3aa:	bb 27       	eor	r27, r27
+
+000003ac <__utoa_common>:
+ 3ac:	fb 01       	movw	r30, r22
+ 3ae:	55 27       	eor	r21, r21
+ 3b0:	aa 27       	eor	r26, r26
+ 3b2:	88 0f       	add	r24, r24
+ 3b4:	99 1f       	adc	r25, r25
+ 3b6:	aa 1f       	adc	r26, r26
+ 3b8:	a4 17       	cp	r26, r20
+ 3ba:	10 f0       	brcs	.+4      	; 0x3c0 <__utoa_common+0x14>
+ 3bc:	a4 1b       	sub	r26, r20
+ 3be:	83 95       	inc	r24
+ 3c0:	50 51       	subi	r21, 0x10	; 16
+ 3c2:	b9 f7       	brne	.-18     	; 0x3b2 <__utoa_common+0x6>
+ 3c4:	a0 5d       	subi	r26, 0xD0	; 208
+ 3c6:	aa 33       	cpi	r26, 0x3A	; 58
+ 3c8:	08 f0       	brcs	.+2      	; 0x3cc <__utoa_common+0x20>
+ 3ca:	a9 5d       	subi	r26, 0xD9	; 217
+ 3cc:	a1 93       	st	Z+, r26
+ 3ce:	00 97       	sbiw	r24, 0x00	; 0
+ 3d0:	79 f7       	brne	.-34     	; 0x3b0 <__utoa_common+0x4>
+ 3d2:	b1 11       	cpse	r27, r1
+ 3d4:	b1 93       	st	Z+, r27
+ 3d6:	11 92       	st	Z+, r1
+ 3d8:	cb 01       	movw	r24, r22
+ 3da:	0c 94 ef 01 	jmp	0x3de	; 0x3de <strrev>
+
+000003de <strrev>:
+ 3de:	dc 01       	movw	r26, r24
+ 3e0:	fc 01       	movw	r30, r24
+ 3e2:	67 2f       	mov	r22, r23
+ 3e4:	71 91       	ld	r23, Z+
+ 3e6:	77 23       	and	r23, r23
+ 3e8:	e1 f7       	brne	.-8      	; 0x3e2 <strrev+0x4>
+ 3ea:	32 97       	sbiw	r30, 0x02	; 2
+ 3ec:	04 c0       	rjmp	.+8      	; 0x3f6 <strrev+0x18>
+ 3ee:	7c 91       	ld	r23, X
+ 3f0:	6d 93       	st	X+, r22
+ 3f2:	70 83       	st	Z, r23
+ 3f4:	62 91       	ld	r22, -Z
+ 3f6:	ae 17       	cp	r26, r30
+ 3f8:	bf 07       	cpc	r27, r31
+ 3fa:	c8 f3       	brcs	.-14     	; 0x3ee <strrev+0x10>
+ 3fc:	08 95       	ret
+
+000003fe <_exit>:
+ 3fe:	f8 94       	cli
+
+00000400 <__stop_program>:
+ 400:	ff cf       	rjmp	.-2      	; 0x400 <__stop_program>
