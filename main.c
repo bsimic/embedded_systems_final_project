@@ -6,6 +6,8 @@
 
 #include "lcd.h"
 
+
+
 void writeLCD(uint16_t adc) {
 	lcd_clrscr();
 
